@@ -41,6 +41,7 @@ class Replay_Buffer(object):
             return experiences
             
     def separate_out_data_types(self, experiences):
+        # 格式化数据
         """Puts the sampled experience into the correct format for a PyTorch neural network"""
         states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(self.device)
         actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(self.device)
