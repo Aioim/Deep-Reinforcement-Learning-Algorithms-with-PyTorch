@@ -18,6 +18,7 @@ class Replay_Buffer(object):
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def add_experience(self, states, actions, rewards, next_states, dones):
+        # 添加经验
         """Adds experience(s) into the replay buffer"""
         if type(dones) == list:
             assert type(dones[0]) != list, "A done shouldn't be a list"
@@ -30,6 +31,7 @@ class Replay_Buffer(object):
             self.memory.append(experience)
    
     def sample(self, num_experiences=None, separate_out_data_types=True):
+        # 基于需要的数据处理数据
         """Draws a random sample of experience from the replay buffer"""
         experiences = self.pick_experiences(num_experiences)
         if separate_out_data_types:
@@ -49,6 +51,7 @@ class Replay_Buffer(object):
         return states, actions, rewards, next_states, dones
     
     def pick_experiences(self, num_experiences=None):
+        # 从经验池选择数据
         if num_experiences is not None: batch_size = num_experiences
         else: batch_size = self.batch_size
         return random.sample(self.memory, k=batch_size)
