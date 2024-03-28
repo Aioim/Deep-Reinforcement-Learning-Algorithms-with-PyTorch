@@ -48,7 +48,7 @@ class Base_Agent(object):
         self.device = "cuda:0" if config.use_GPU else "cpu"
         self.visualise_results_boolean = config.visualise_individual_results
         self.global_step_number = 0
-        self.turn_off_exploration = False
+        self.turn_off_exploration = False  # 停止探索
         gym.logger.set_level(40)  # stops it from printing an unnecessary warning
         self.log_game_info()
 
@@ -344,6 +344,7 @@ class Base_Agent(object):
             self.logger.info("Learning rate {}".format(new_lr))
 
     def enough_experiences_to_learn_from(self):
+        # 是否有足够的经验满足学习
         """Boolean indicated whether there are enough experiences in the memory buffer to learn from"""
         return len(self.memory) > self.hyperparameters["batch_size"]
 
@@ -455,11 +456,13 @@ class Base_Agent(object):
         ).to(self.device)
 
     def turn_on_any_epsilon_greedy_exploration(self):
+        # 停止探索
         """Turns off all exploration with respect to the epsilon greedy exploration strategy"""
         print("Turning on epsilon greedy exploration")
         self.turn_off_exploration = False
 
     def turn_off_any_epsilon_greedy_exploration(self):
+        # 启动探索
         """Turns off all exploration with respect to the epsilon greedy exploration strategy"""
         print("Turning off epsilon greedy exploration")
         self.turn_off_exploration = True
