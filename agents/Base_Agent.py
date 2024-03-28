@@ -368,5 +368,6 @@ class Base_Agent(object):
     @staticmethod
     def copy_model_over(from_model, to_model):
         """Copies model parameters from from_model to to_model"""
-        for to_model, from_model in zip(to_model.parameters(), from_model.parameters()):
-            to_model.data.copy_(from_model.data.clone())
+        #for to_model, from_model in zip(to_model.parameters(), from_model.parameters()):
+        #    to_model.data.copy_(from_model.data.clone())
+        from_model.load_state_dict(to_model.state_dict()
