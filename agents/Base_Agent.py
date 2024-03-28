@@ -44,7 +44,7 @@ class Base_Agent(object):
         self.rolling_results = []
         self.max_rolling_score_seen = float("-inf")
         self.max_episode_score_seen = float("-inf")
-        self.episode_number = 0 # 一幕
+        self.episode_number = 0  # 一幕
         self.device = "cuda:0" if config.use_GPU else "cpu"
         self.visualise_results_boolean = config.visualise_individual_results
         self.global_step_number = 0
@@ -349,8 +349,9 @@ class Base_Agent(object):
         return len(self.memory) > self.hyperparameters["batch_size"]
 
     def save_experience(self, memory=None, experience=None):
+        # 保存经验
         """Saves the recent experience to the memory buffer"""
-        if memory is None:
+        if memory is None:#可能使用其他类型的经验池
             memory = self.memory
         if experience is None:
             experience = (
@@ -384,7 +385,7 @@ class Base_Agent(object):
 
         # log weight information
         total_norm = 0
-        for name, param in network.named_parameters():
+        for _, param in network.named_parameters():
             param_norm = param.grad.data.norm(2)
             total_norm += param_norm.item() ** 2
         total_norm = total_norm ** (1.0 / 2)
@@ -468,6 +469,7 @@ class Base_Agent(object):
         self.turn_off_exploration = True
 
     def freeze_all_but_output_layers(self, network):
+        # 冻结输出层以外的图层
         """Freezes all layers except the output layer of a network"""
         print("Freezing hidden layers")
         for param in network.named_parameters():
@@ -481,6 +483,7 @@ class Base_Agent(object):
                 param[1].requires_grad = False
 
     def unfreeze_all_layers(self, network):
+        # 解冻所有层网络
         """Unfreezes all layers of a network"""
         print("Unfreezing all layers")
         for param in network.parameters():
