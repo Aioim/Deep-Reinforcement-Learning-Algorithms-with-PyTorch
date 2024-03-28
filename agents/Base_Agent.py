@@ -44,7 +44,7 @@ class Base_Agent(object):
         self.rolling_results = []
         self.max_rolling_score_seen = float("-inf")
         self.max_episode_score_seen = float("-inf")
-        self.episode_number = 0
+        self.episode_number = 0 # 一幕
         self.device = "cuda:0" if config.use_GPU else "cpu"
         self.visualise_results_boolean = config.visualise_individual_results
         self.global_step_number = 0
@@ -498,6 +498,7 @@ class Base_Agent(object):
 
     @staticmethod
     def copy_model_over(from_model, to_model):
+        # 同步模型参数
         """Copies model parameters from from_model to to_model"""
         # for to_model, from_model in zip(to_model.parameters(), from_model.parameters()):
         #    to_model.data.copy_(from_model.data.clone())
