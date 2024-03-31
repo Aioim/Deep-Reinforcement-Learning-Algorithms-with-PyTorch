@@ -31,6 +31,7 @@ class REINFORCE(Base_Agent):
             self.pick_and_conduct_action_and_save_log_probabilities()
             self.update_next_state_reward_done_and_score()
             self.store_reward()
+            """完成一幕才进行一次迭代学习"""
             if self.time_to_learn():
                 self.actor_learn()
             self.state = self.next_state #this is to set the state for the next iteration
@@ -46,6 +47,7 @@ class REINFORCE(Base_Agent):
         self.conduct_action()
 
     def pick_action_and_get_log_probabilities(self):
+        # 计算动作概率信息及动作的log值
         """Picks actions and then calculates the log probabilities of the actions it picked given the policy"""
         # PyTorch only accepts mini-batches and not individual observations so we have to add
         # a "fake" dimension to our observation using unsqueeze
@@ -77,12 +79,14 @@ class REINFORCE(Base_Agent):
 
     def calculate_episode_discounted_reward(self):
         """Calculates the cumulative discounted return for the episode"""
+        # 通过np.arange计算每个state值对对应的Gamma值，再进行dot向量相乘得到return_total
         discounts = self.hyperparameters["discount_rate"] ** np.arange(len(self.episode_rewards))
         total_discounted_reward = np.dot(discounts, self.episode_rewards)
         return total_discounted_reward
 
     def calculate_policy_loss_on_episode(self, total_discounted_reward):
         """Calculates the loss from an episode"""
+        # 计算每一幕的loss
         policy_loss = []
         for log_prob in self.episode_log_probabilities:
             policy_loss.append(-log_prob * total_discounted_reward)
