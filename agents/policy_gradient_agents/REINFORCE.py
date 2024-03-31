@@ -44,7 +44,7 @@ class REINFORCE(Base_Agent):
         action, log_probabilities = self.pick_action_and_get_log_probabilities()
         self.store_log_probabilities(log_probabilities)
         self.store_action(action)
-        self.conduct_action()
+        self.conduct_action(action)
 
     def pick_action_and_get_log_probabilities(self):
         # 计算动作概率信息及动作的log值
