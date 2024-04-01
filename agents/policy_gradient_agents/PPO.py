@@ -29,13 +29,14 @@ class PPO(Base_Agent):
 
     def calculate_policy_output_size(self):
         """Initialises the policies"""
-        if self.action_types == "DISCRETE":
+        if self.action_types == "DISCRETE": #离散动作
             return self.action_size
-        elif self.action_types == "CONTINUOUS":
+        elif self.action_types == "CONTINUOUS": #连续动作
             return self.action_size * 2 #Because we need 1 parameter for mean and 1 for std of distribution
 
     def step(self):
         """Runs a step for the PPO agent"""
+        # 探索策略
         exploration_epsilon =  self.exploration_strategy.get_updated_epsilon_exploration({"episode_number": self.episode_number})
         self.many_episode_states, self.many_episode_actions, self.many_episode_rewards = self.experience_generator.play_n_episodes(
             self.hyperparameters["episodes_per_learning_round"], exploration_epsilon)
@@ -56,13 +57,16 @@ class PPO(Base_Agent):
 
     def calculate_all_discounted_returns(self):
         """Calculates the cumulative discounted return for each episode which we will then use in a learning iteration"""
+        # 计算所有幕的return_total
         all_discounted_returns = []
         for episode in range(len(self.many_episode_states)):
             discounted_returns = [0]
+            # 遍历所有幕，计算每一步的return
             for ix in range(len(self.many_episode_states[episode])):
                 return_value = self.many_episode_rewards[episode][-(ix + 1)] + self.hyperparameters["discount_rate"]*discounted_returns[-1]
                 discounted_returns.append(return_value)
             discounted_returns = discounted_returns[1:]
+            # 保存每一幕的return_total
             all_discounted_returns.extend(discounted_returns[::-1])
         return all_discounted_returns
 
@@ -78,10 +82,12 @@ class PPO(Base_Agent):
 
         new_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_new, all_states, all_actions)
         old_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_old, all_states, all_actions)
+        # 
         ratio_of_policy_probabilities = torch.exp(new_policy_distribution_log_prob) / (torch.exp(old_policy_distribution_log_prob) + 1e-8)
         return ratio_of_policy_probabilities
 
     def calculate_log_probability_of_actions(self, policy, states, actions):
+        # 计算动作的对数概率
         """Calculates the log probability of an action occuring given a policy and starting state"""
         policy_output = policy.forward(states).to(self.device)
         policy_distribution = create_actor_distribution(self.action_types, policy_output, self.action_size)
@@ -114,6 +120,7 @@ class PPO(Base_Agent):
             "gradient_clipping_norm"])  # clip gradients to help stabilise training
         self.policy_new_optimizer.step()  # this applies the gradients
 
+    # 同步模型参数
     def equalise_policies(self):
         """Sets the old policy's parameters equal to the new policy's parameters"""
         for old_param, new_param in zip(self.policy_old.parameters(), self.policy_new.parameters()):
