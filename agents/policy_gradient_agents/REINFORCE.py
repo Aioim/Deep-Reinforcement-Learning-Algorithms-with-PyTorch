@@ -29,7 +29,7 @@ class REINFORCE(Base_Agent):
         """Runs a step within a game including a learning step if required"""
         while not self.done:
             self.pick_and_conduct_action_and_save_log_probabilities()
-            self.update_next_state_reward_done_and_score()
+            # self.update_next_state_reward_done_and_score()
             self.store_reward()
             """完成一幕才进行一次迭代学习"""
             if self.time_to_learn():
@@ -41,9 +41,10 @@ class REINFORCE(Base_Agent):
     def pick_and_conduct_action_and_save_log_probabilities(self):
         """Picks and then conducts actions. Then saves the log probabilities of the actions it conducted to be used for
         learning later"""
+        # 获取动作及执行动作
         action, log_probabilities = self.pick_action_and_get_log_probabilities()
-        self.store_log_probabilities(log_probabilities)
-        self.store_action(action)
+        self.store_log_probabilities(log_probabilities)# 保存动作的log值
+        self.store_action(action) # 保存动作
         self.conduct_action(action)
 
     def pick_action_and_get_log_probabilities(self):
