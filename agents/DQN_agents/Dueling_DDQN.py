@@ -44,6 +44,8 @@ class Dueling_DDQN(DDQN):
     def calculate_duelling_q_values(self, duelling_q_network_output):
         """Calculates the q_values using the duelling network architecture. This is equation (9) in the paper
         referenced at the top of the class"""
+        # https://zhuanlan.zhihu.com/p/671328397 
+        # Q_value=A(s,a)+V(s)
         state_value = duelling_q_network_output[:, -1]
         avg_advantage = torch.mean(duelling_q_network_output[:, :-1], dim=1)
         q_values = state_value.unsqueeze(1) + (duelling_q_network_output[:, :-1] - avg_advantage.unsqueeze(1))
