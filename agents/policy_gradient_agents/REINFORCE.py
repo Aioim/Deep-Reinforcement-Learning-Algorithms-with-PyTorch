@@ -29,7 +29,7 @@ class REINFORCE(Base_Agent):
         """Runs a step within a game including a learning step if required"""
         while not self.done:
             self.pick_and_conduct_action_and_save_log_probabilities()
-            self.update_next_state_reward_done_and_score()
+            # self.update_next_state_reward_done_and_score()
             self.store_reward()
             """完成一幕才进行一次迭代学习"""
             if self.time_to_learn():
