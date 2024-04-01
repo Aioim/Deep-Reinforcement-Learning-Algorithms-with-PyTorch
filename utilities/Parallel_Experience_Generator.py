@@ -28,7 +28,9 @@ class Parallel_Experience_Generator(object):
     def play_n_episodes(self, n, exploration_epsilon=None):
         """Plays n episodes in parallel using the fixed policy and returns the data"""
         self.exploration_epsilon = exploration_epsilon
+        # 多进程添加数据
         with closing(Pool(processes=n)) as pool:
+            # self，执行self.play_1_episode
             results = pool.map(self, range(n))
             pool.terminate()
         states_for_all_episodes = [episode[0] for episode in results]
