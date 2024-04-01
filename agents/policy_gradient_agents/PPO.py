@@ -97,6 +97,7 @@ class PPO(Base_Agent):
     def calculate_loss(self, all_ratio_of_policy_probabilities, all_discounted_returns):
         """Calculates the PPO loss"""
         all_ratio_of_policy_probabilities = torch.squeeze(torch.stack(all_ratio_of_policy_probabilities))
+        # torch.clamp对输入张量进行截断操作，将张量中的每个元素限制在指定的范围内。
         all_ratio_of_policy_probabilities = torch.clamp(input=all_ratio_of_policy_probabilities,
                                                         min = -sys.maxsize,
                                                         max = sys.maxsize)
@@ -113,6 +114,7 @@ class PPO(Base_Agent):
                                   max=1.0 + self.hyperparameters["clip_epsilon"])
 
     def take_policy_new_optimisation_step(self, loss):
+        # 优化策略模型
         """Takes an optimisation step for the new policy"""
         self.policy_new_optimizer.zero_grad()  # reset gradients to 0
         loss.backward()  # this calculates the gradients
