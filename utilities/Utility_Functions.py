@@ -14,6 +14,7 @@ def save_score_results(file_path, results):
     np.save(file_path, results)
 
 def normalise_rewards(rewards):
+    # rewards 归一化
     """Normalises rewards to mean 0 and standard deviation 1"""
     mean_reward = np.mean(rewards)
     std_reward = np.std(rewards)
