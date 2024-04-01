@@ -260,6 +260,7 @@ class Base_Agent(object):
             self.reward = max(min(self.reward, 1.0), -1.0)
 
     def save_and_print_result(self):
+        # 保存打印结果
         """Saves and prints results of the game"""
         self.save_result()
         self.print_rolling_result()
