@@ -71,6 +71,7 @@ class REINFORCE(Base_Agent):
         self.episode_rewards.append(self.reward)
 
     def actor_learn(self):
+        # 演员模型更新模型
         """Runs a learning iteration for the policy"""
         total_discounted_reward = self.calculate_episode_discounted_reward()
         policy_loss = self.calculate_policy_loss_on_episode(total_discounted_reward)
