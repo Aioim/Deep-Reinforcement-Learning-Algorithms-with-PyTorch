@@ -8,6 +8,7 @@ from exploration_strategies.Epsilon_Greedy_Exploration import Epsilon_Greedy_Exp
 from utilities.Parallel_Experience_Generator import Parallel_Experience_Generator
 from utilities.Utility_Functions import normalise_rewards, create_actor_distribution
 
+
 class PPO(Base_Agent):
     """Proximal Policy Optimization agent"""
     agent_name = "PPO"
@@ -18,7 +19,8 @@ class PPO(Base_Agent):
         self.policy_new = self.create_NN(input_dim=self.state_size, output_dim=self.policy_output_size)
         self.policy_old = self.create_NN(input_dim=self.state_size, output_dim=self.policy_output_size)
         self.policy_old.load_state_dict(copy.deepcopy(self.policy_new.state_dict()))
-        self.policy_new_optimizer = optim.Adam(self.policy_new.parameters(), lr=self.hyperparameters["learning_rate"], eps=1e-4)
+        self.policy_new_optimizer = optim.Adam(self.policy_new.parameters(), lr=self.hyperparameters["learning_rate"],
+                                               eps=1e-4)
         self.episode_number = 0
         self.many_episode_states = []
         self.many_episode_actions = []
@@ -29,19 +31,23 @@ class PPO(Base_Agent):
 
     def calculate_policy_output_size(self):
         """Initialises the policies"""
-        if self.action_types == "DISCRETE": #离散动作
+        if self.action_types == "DISCRETE":  # 离散动作
             return self.action_size
-        elif self.action_types == "CONTINUOUS": #连续动作
-            return self.action_size * 2 #Because we need 1 parameter for mean and 1 for std of distribution
+        elif self.action_types == "CONTINUOUS":  # 连续动作
+            return self.action_size * 2  # Because we need 1 parameter for mean and 1 for std of distribution
 
     def step(self):
         """Runs a step for the PPO agent"""
         # 探索策略
-        exploration_epsilon =  self.exploration_strategy.get_updated_epsilon_exploration({"episode_number": self.episode_number})
-        self.many_episode_states, self.many_episode_actions, self.many_episode_rewards = self.experience_generator.play_n_episodes(
-            self.hyperparameters["episodes_per_learning_round"], exploration_epsilon)
+        exploration_epsilon = self.exploration_strategy.get_updated_epsilon_exploration(
+            {"episode_number": self.episode_number})
+        # 基于当前模型，多幕构造经验
+        self.many_episode_states, self.many_episode_actions, self.many_episode_rewards = (
+            self.experience_generator.play_n_episodes(self.hyperparameters["episodes_per_learning_round"], exploration_epsilon))
         self.episode_number += self.hyperparameters["episodes_per_learning_round"]
+        # 策略模型学习
         self.policy_learn()
+        # 更新模型
         self.update_learning_rate(self.hyperparameters["learning_rate"], self.policy_new_optimizer)
         self.equalise_policies()
 
@@ -51,7 +57,10 @@ class PPO(Base_Agent):
         if self.hyperparameters["normalise_rewards"]:
             all_discounted_returns = normalise_rewards(all_discounted_returns)
         for _ in range(self.hyperparameters["learning_iterations_per_round"]):
+            # 1、计算新旧模型获取各个动作的log_probability
+            # 2、计算log_probability比率
             all_ratio_of_policy_probabilities = self.calculate_all_ratio_of_policy_probabilities()
+            # 计算loss
             loss = self.calculate_loss([all_ratio_of_policy_probabilities], all_discounted_returns)
             self.take_policy_new_optimisation_step(loss)
 
@@ -63,7 +72,8 @@ class PPO(Base_Agent):
             discounted_returns = [0]
             # 遍历所有幕，计算每一步的return
             for ix in range(len(self.many_episode_states[episode])):
-                return_value = self.many_episode_rewards[episode][-(ix + 1)] + self.hyperparameters["discount_rate"]*discounted_returns[-1]
+                return_value = self.many_episode_rewards[episode][-(ix + 1)] + self.hyperparameters["discount_rate"] * \
+                               discounted_returns[-1]
                 discounted_returns.append(return_value)
             discounted_returns = discounted_returns[1:]
             # 保存每一幕的return_total
@@ -74,16 +84,20 @@ class PPO(Base_Agent):
         """For each action calculates the ratio of the probability that the new policy would have picked the action vs.
          the probability the old policy would have picked it. This will then be used to inform the loss"""
         all_states = [state for states in self.many_episode_states for state in states]
-        all_actions = [[action] if self.action_types == "DISCRETE" else action for actions in self.many_episode_actions for action in actions ]
+        all_actions = [[action] if self.action_types == "DISCRETE" else action for actions in self.many_episode_actions
+                       for action in actions]
         all_states = torch.stack([torch.Tensor(states).float().to(self.device) for states in all_states])
 
         all_actions = torch.stack([torch.Tensor(actions).float().to(self.device) for actions in all_actions])
         all_actions = all_actions.view(-1, len(all_states))
 
-        new_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_new, all_states, all_actions)
-        old_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_old, all_states, all_actions)
+        new_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_new, all_states,
+                                                                                     all_actions)
+        old_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_old, all_states,
+                                                                                     all_actions)
         # 
-        ratio_of_policy_probabilities = torch.exp(new_policy_distribution_log_prob) / (torch.exp(old_policy_distribution_log_prob) + 1e-8)
+        ratio_of_policy_probabilities = torch.exp(new_policy_distribution_log_prob) / (
+                torch.exp(old_policy_distribution_log_prob) + 1e-8)
         return ratio_of_policy_probabilities
 
     def calculate_log_probability_of_actions(self, policy, states, actions):
@@ -99,11 +113,12 @@ class PPO(Base_Agent):
         all_ratio_of_policy_probabilities = torch.squeeze(torch.stack(all_ratio_of_policy_probabilities))
         # torch.clamp对输入张量进行截断操作，将张量中的每个元素限制在指定的范围内。
         all_ratio_of_policy_probabilities = torch.clamp(input=all_ratio_of_policy_probabilities,
-                                                        min = -sys.maxsize,
-                                                        max = sys.maxsize)
+                                                        min=-sys.maxsize,
+                                                        max=sys.maxsize)
         all_discounted_returns = torch.tensor(all_discounted_returns).to(all_ratio_of_policy_probabilities)
         potential_loss_value_1 = all_discounted_returns * all_ratio_of_policy_probabilities
-        potential_loss_value_2 = all_discounted_returns * self.clamp_probability_ratio(all_ratio_of_policy_probabilities)
+        potential_loss_value_2 = all_discounted_returns * self.clamp_probability_ratio(
+            all_ratio_of_policy_probabilities)
         loss = torch.min(potential_loss_value_1, potential_loss_value_2)
         loss = -torch.mean(loss)
         return loss
@@ -111,7 +126,7 @@ class PPO(Base_Agent):
     def clamp_probability_ratio(self, value):
         """Clamps a value between a certain range determined by hyperparameter clip epsilon"""
         return torch.clamp(input=value, min=1.0 - self.hyperparameters["clip_epsilon"],
-                                  max=1.0 + self.hyperparameters["clip_epsilon"])
+                           max=1.0 + self.hyperparameters["clip_epsilon"])
 
     def take_policy_new_optimisation_step(self, loss):
         # 优化策略模型

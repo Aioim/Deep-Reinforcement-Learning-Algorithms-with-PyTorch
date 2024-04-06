@@ -29,94 +29,87 @@ config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
 config.save_model = False
 
-
-
-
 config.hyperparameters = {
 
-        "LOWER_LEVEL": {
-            "max_lower_level_timesteps": 3,
+    "LOWER_LEVEL": {
+        "max_lower_level_timesteps": 3,
 
-            "Actor": {
-                "learning_rate": 0.001,
-                "linear_hidden_units": [20, 20],
-                "final_layer_activation": "TANH",
-                "batch_norm": False,
-                "tau": 0.005,
-                "gradient_clipping_norm": 5
-            },
+        "Actor": {
+            "learning_rate": 0.001,
+            "linear_hidden_units": [20, 20],
+            "final_layer_activation": "TANH",
+            "batch_norm": False,
+            "tau": 0.005,
+            "gradient_clipping_norm": 5
+        },
 
-            "Critic": {
-                "learning_rate": 0.01,
-                "linear_hidden_units": [20, 20],
-                "final_layer_activation": "None",
-                "batch_norm": False,
-                "buffer_size": 100000,
-                "tau": 0.005,
-                "gradient_clipping_norm": 5,
+        "Critic": {
+            "learning_rate": 0.01,
+            "linear_hidden_units": [20, 20],
+            "final_layer_activation": "None",
+            "batch_norm": False,
+            "buffer_size": 100000,
+            "tau": 0.005,
+            "gradient_clipping_norm": 5,
 
-            },
+        },
 
-            "batch_size": 256,
-            "discount_rate": 0.9,
-            "mu": 0.0,  # for O-H noise
-            "theta": 0.15,  # for O-H noise
-            "sigma": 0.25,  # for O-H noise
-            "action_noise_std": 0.2,  # for TD3
-            "action_noise_clipping_range": 0.5,  # for TD3
-            "update_every_n_steps": 20,
-            "learning_updates_per_learning_session": 10,
-            "number_goal_candidates": 8,
-            "clip_rewards": False
+        "batch_size": 256,
+        "discount_rate": 0.9,
+        "mu": 0.0,  # for O-H noise
+        "theta": 0.15,  # for O-H noise
+        "sigma": 0.25,  # for O-H noise
+        "action_noise_std": 0.2,  # for TD3
+        "action_noise_clipping_range": 0.5,  # for TD3
+        "update_every_n_steps": 20,
+        "learning_updates_per_learning_session": 10,
+        "number_goal_candidates": 8,
+        "clip_rewards": False
 
+    },
 
-            } ,
+    "HIGHER_LEVEL": {
 
+        "Actor": {
+            "learning_rate": 0.001,
+            "linear_hidden_units": [20, 20],
+            "final_layer_activation": "TANH",
+            "batch_norm": False,
+            "tau": 0.005,
+            "gradient_clipping_norm": 5,
+            "number_goal_candidates": 8
+        },
 
+        "Critic": {
+            "learning_rate": 0.01,
+            "linear_hidden_units": [20, 20],
+            "final_layer_activation": "None",
+            "batch_norm": False,
+            "buffer_size": 100000,
+            "tau": 0.005,
+            "gradient_clipping_norm": 5
+        },
 
-        "HIGHER_LEVEL": {
+        "batch_size": 256,
+        "discount_rate": 0.9,
+        "mu": 0.0,  # for O-H noise
+        "theta": 0.15,  # for O-H noise
+        "sigma": 0.25,  # for O-H noise
+        "action_noise_std": 0.2,  # for TD3
+        "action_noise_clipping_range": 0.5,  # for TD3
+        "update_every_n_steps": 20,
+        "learning_updates_per_learning_session": 10,
+        "number_goal_candidates": 8,
+        "clip_rewards": False
 
-                "Actor": {
-                "learning_rate": 0.001,
-                "linear_hidden_units": [20, 20],
-                "final_layer_activation": "TANH",
-                "batch_norm": False,
-                "tau": 0.005,
-                "gradient_clipping_norm": 5,
-                "number_goal_candidates": 8
-            },
+    },
 
-            "Critic": {
-                "learning_rate": 0.01,
-                "linear_hidden_units": [20, 20],
-                "final_layer_activation": "None",
-                "batch_norm": False,
-                "buffer_size": 100000,
-                "tau": 0.005,
-                "gradient_clipping_norm": 5
-            },
-
-            "batch_size": 256,
-            "discount_rate": 0.9,
-            "mu": 0.0,  # for O-H noise
-            "theta": 0.15,  # for O-H noise
-            "sigma": 0.25,  # for O-H noise
-            "action_noise_std": 0.2,  # for TD3
-            "action_noise_clipping_range": 0.5,  # for TD3
-            "update_every_n_steps": 20,
-            "learning_updates_per_learning_session": 10,
-            "number_goal_candidates": 8,
-            "clip_rewards": False
-
-            } ,
-
-
-        }
-
+}
 
 hiro_agent = HIRO(config)
 ll_env = hiro_agent.lower_level_agent.environment
 h_env = hiro_agent.higher_level_agent.environment
+
 
 def test_environment_resets():
     """Tests created environments reset properly"""
@@ -155,7 +148,6 @@ def test_goal_transition():
     assert all(hiro_agent.goal == state + np.array([2.0, 4.0, -3.0]) - next_state[0:3])
 
 
-
 def test_higher_level_step():
     """Tests environment for higher level steps correctly"""
     hiro_agent = HIRO(config)
@@ -167,7 +159,7 @@ def test_higher_level_step():
     assert hiro_agent.higher_level_next_state is None
     next_state, reward, done, _ = h_env.step(np.array([-1.0, 2.0, 3.0]))
 
-    assert np.allclose(hiro_agent.goal, HIRO.goal_transition(state_before,  np.array([-1.0, 2.0, 3.0]), next_state))
+    assert np.allclose(hiro_agent.goal, HIRO.goal_transition(state_before, np.array([-1.0, 2.0, 3.0]), next_state))
 
     assert all(hiro_agent.higher_level_state == next_state)
     assert all(hiro_agent.higher_level_next_state == next_state)
@@ -185,6 +177,7 @@ def test_higher_level_step():
         assert hiro_agent.higher_level_reward == reward
         assert hiro_agent.higher_level_done == done
 
+
 def test_changing_max_lower_timesteps():
     """Tests that changing the max lower level timesteps works"""
     config2 = copy.deepcopy(config)
@@ -197,6 +190,7 @@ def test_changing_max_lower_timesteps():
     assert not done
     assert hiro_agent2.lower_level_done
     assert reward == hiro_agent2.higher_level_reward
+
 
 def test_lower_level_step():
     """Tests the step level for the lower level environment"""
@@ -224,7 +218,7 @@ def test_lower_level_step():
     assert all(next_state == hiro_agent.lower_level_state)
     assert done == hiro_agent.lower_level_done
     assert not hiro_agent.higher_level_done
-    assert reward == ll_env.calculate_intrinsic_reward(hl_next_state,  hiro_agent.higher_level_next_state , previous_goal)
+    assert reward == ll_env.calculate_intrinsic_reward(hl_next_state, hiro_agent.higher_level_next_state, previous_goal)
 
     for _ in range(100):
         previous_goal = hiro_agent.goal
@@ -239,6 +233,7 @@ def test_lower_level_step():
         assert done == hiro_agent.lower_level_done
         assert reward == ll_env.calculate_intrinsic_reward(state, hiro_agent.higher_level_next_state,
                                                            previous_goal)
+
 
 def test_sub_policy_env_turn_internal_state_to_external_state():
     """Tests turn_internal_state_to_external_state method in the sub policy environment we create"""

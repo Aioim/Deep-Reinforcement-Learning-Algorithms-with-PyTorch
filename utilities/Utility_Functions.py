@@ -6,19 +6,23 @@ import torch
 from nn_builder.pytorch.NN import NN
 from torch.distributions import Categorical, normal, MultivariateNormal
 
+
 def abstract(cls):
     return ABCMeta(cls.__name__, cls.__bases__, dict(cls.__dict__))
-    
+
+
 def save_score_results(file_path, results):
     """Saves results as a numpy file at given path"""
     np.save(file_path, results)
+
 
 def normalise_rewards(rewards):
     # # 标准化rewards
     """Normalises rewards to mean 0 and standard deviation 1"""
     mean_reward = np.mean(rewards)
     std_reward = np.std(rewards)
-    return (rewards - mean_reward) / (std_reward + 1e-8) #1e-8 added for stability
+    return (rewards - mean_reward) / (std_reward + 1e-8)  # 1e-8 added for stability
+
 
 def create_actor_distribution(action_types, actor_output, action_size):
     """Creates a distribution that the actor can then use to randomly draw actions"""
@@ -28,7 +32,7 @@ def create_actor_distribution(action_types, actor_output, action_size):
     else:
         assert actor_output.size()[1] == action_size * 2, "Actor output the wrong size"
         means = actor_output[:, :action_size].squeeze(0)
-        stds = actor_output[:,  action_size:].squeeze(0)
+        stds = actor_output[:, action_size:].squeeze(0)
         if len(means.shape) == 2: means = means.squeeze(-1)
         if len(stds.shape) == 2: stds = stds.squeeze(-1)
         if len(stds.shape) > 1 or len(means.shape) > 1:
@@ -36,11 +40,14 @@ def create_actor_distribution(action_types, actor_output, action_size):
         action_distribution = normal.Normal(means.squeeze(0), torch.abs(stds))
     return action_distribution
 
+
 class SharedAdam(torch.optim.Adam):
     """Creates an adam optimizer object that is shareable between processes. Useful for algorithms like A3C. Code
     taken from https://github.com/ikostrikov/pytorch-a3c/blob/master/my_optim.py"""
+
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0, amsgrad=False):
-        super(SharedAdam, self).__init__(params, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, amsgrad=amsgrad)
+        super(SharedAdam, self).__init__(params, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay,
+                                         amsgrad=amsgrad)
         for group in self.param_groups:
             for p in group['params']:
                 state = self.state[p]
@@ -97,23 +104,27 @@ class SharedAdam(torch.optim.Adam):
                 p.data.addcdiv_(-step_size, exp_avg, denom)
         return loss
 
+
 def flatten_action_id_to_actions(action_id_to_actions, global_action_id_to_primitive_action, num_primitive_actions):
     """Converts the values in an action_id_to_actions dictionary back to the primitive actions they represent"""
     flattened_action_id_to_actions = {}
     for key in action_id_to_actions.keys():
         actions = action_id_to_actions[key]
-        raw_actions = backtrack_action_to_primitive_actions(actions, global_action_id_to_primitive_action, num_primitive_actions)
+        raw_actions = backtrack_action_to_primitive_actions(actions, global_action_id_to_primitive_action,
+                                                            num_primitive_actions)
         flattened_action_id_to_actions[key] = raw_actions
     return flattened_action_id_to_actions
+
 
 def backtrack_action_to_primitive_actions(action_tuple, global_action_id_to_primitive_action, num_primitive_actions):
     """Converts an action tuple back to the primitive actions it represents in a recursive way."""
     print("Recursing to backtrack on ", action_tuple)
     primitive_actions = range(num_primitive_actions)
-    if all(action in primitive_actions for action in action_tuple): return action_tuple #base case
+    if all(action in primitive_actions for action in action_tuple): return action_tuple  # base case
     new_action_tuple = []
     for action in action_tuple:
-        if action in primitive_actions: new_action_tuple.append(action)
+        if action in primitive_actions:
+            new_action_tuple.append(action)
         else:
             converted_action = global_action_id_to_primitive_action[action]
             print(new_action_tuple)
