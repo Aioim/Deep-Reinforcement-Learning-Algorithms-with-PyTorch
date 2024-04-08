@@ -37,8 +37,13 @@ class PPO(Base_Agent):
             return self.action_size * 2  # Because we need 1 parameter for mean and 1 for std of distribution
 
     def step(self):
-        """Runs a step for the PPO agent"""
-        # 探索策略
+
+        """
+        Runs a step for the PPO agent
+        1、获取N_episodes数据
+        2、每一幕更新模型
+        3、特定步同步模型参数
+        """
         exploration_epsilon = self.exploration_strategy.get_updated_epsilon_exploration(
             {"episode_number": self.episode_number})
         # 基于当前模型，多幕构造经验
@@ -65,6 +70,7 @@ class PPO(Base_Agent):
             all_ratio_of_policy_probabilities = self.calculate_all_ratio_of_policy_probabilities()
             # 计算loss
             loss = self.calculate_loss([all_ratio_of_policy_probabilities], all_discounted_returns)
+            # 每一幕都优化模型
             self.take_policy_new_optimisation_step(loss)
 
     def calculate_all_discounted_returns(self):
@@ -143,6 +149,7 @@ class PPO(Base_Agent):
         """Takes an optimisation step for the new policy"""
         self.policy_new_optimizer.zero_grad()  # reset gradients to 0
         loss.backward()  # this calculates the gradients
+        # 梯度剪裁，防止梯度爆炸
         torch.nn.utils.clip_grad_norm_(self.policy_new.parameters(), self.hyperparameters[
             "gradient_clipping_norm"])  # clip gradients to help stabilise training
         self.policy_new_optimizer.step()  # this applies the gradients
@@ -150,8 +157,9 @@ class PPO(Base_Agent):
     # 同步模型参数
     def equalise_policies(self):
         """Sets the old policy's parameters equal to the new policy's parameters"""
-        for old_param, new_param in zip(self.policy_old.parameters(), self.policy_new.parameters()):
-            old_param.data.copy_(new_param.data)
+        # for old_param, new_param in zip(self.policy_old.parameters(), self.policy_new.parameters()):
+        #     old_param.data.copy_(new_param.data)
+        self.policy_old.load_state_dict(self.policy_new.state_dict())
 
     def save_result(self):
         """Save the results seen by the agent in the most recent experiences"""

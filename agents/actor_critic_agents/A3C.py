@@ -173,7 +173,8 @@ class Actor_Critic_Worker(torch.multiprocessing.Process):
         critic_output = model_output[:, -1]
         action_distribution = create_actor_distribution(self.action_types, actor_output, self.action_size)
         action = action_distribution.sample().cpu().numpy()
-        if self.action_types == "CONTINUOUS": action += self.noise.sample()
+        if self.action_types == "CONTINUOUS":
+            action += self.noise.sample()
         if self.action_types == "DISCRETE":
             if random.random() <= epsilon_exploration:
                 action = random.randint(0, self.action_size - 1)
