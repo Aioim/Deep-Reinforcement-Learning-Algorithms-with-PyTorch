@@ -9,11 +9,11 @@ from torch.autograd import Variable
 
 
 class DQN(nn.Module):
-    def __init__(self, 
-                model, 
-                optim,
-                epsilon,
-                options):
+    def __init__(self,
+                 model,
+                 optim,
+                 epsilon,
+                 options):
         """ DQN algorithm
         
         Args:
@@ -32,7 +32,7 @@ class DQN(nn.Module):
         self.act_dim = 2
         self.gamma = options.gamma
         self.epsilon = epsilon
-        self.e_decrement = (options.init_e - options.final_e)/options.exploration
+        self.e_decrement = (options.init_e - options.final_e) / options.exploration
         self.final_e = options.final_e
         self.actions = 2
         self.random_threshold = 0.9
@@ -40,12 +40,12 @@ class DQN(nn.Module):
 
     def forward(self, obs):
         return self.model(obs)
-    
+
     def get_action_randomly(self):
         """Get action randomly
         """
         action = np.zeros(self.actions, dtype=np.float32)
-        #action_index = random.randrange(self.actions)
+        # action_index = random.randrange(self.actions)
         action_index = 0 if random.random() < self.random_threshold else 1
         action[action_index] = 1
         return action
@@ -109,17 +109,13 @@ class DQN(nn.Module):
             # ...
 
         q_value = torch.sum(torch.mul(action, q_value), dim=1)
-        
+
         loss = criterion(q_value, target)
         # print(q_value, target, loss)
         loss.backward()
         self.optim.step()
 
         return loss.item()
-
-    
-
-
 
 # if __name__ == "__main__":
 #     main()
