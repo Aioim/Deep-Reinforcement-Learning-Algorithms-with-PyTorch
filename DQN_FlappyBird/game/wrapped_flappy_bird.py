@@ -1,16 +1,12 @@
-
-
-
 # import numpy as np
 # import sys
 import random
 import pygame
-from game import flappy_bird_utils
+import flappy_bird_utils
 # from . import flappy_bird_utils
 # import pygame.surfarray as surfarray
 # from pygame.locals import *
 from itertools import cycle
-
 
 # try:
 #     range
@@ -18,25 +14,24 @@ from itertools import cycle
 #     xrange = range
 
 
-
 FPS = 30
-SCREENWIDTH  = 288
+SCREENWIDTH = 288
 SCREENHEIGHT = 512
-PIPEGAPSIZE = 100 # gap between upper and lower part of pipe
+PIPEGAPSIZE = 100  # gap between upper and lower part of pipe
 BASEY = SCREENHEIGHT * 0.79
 
 pygame.init()
 FPSCLOCK = pygame.time.Clock()
-SCREEN   = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
+SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 pygame.display.set_caption('Flappy Bird')
 
 # IMAGES, SOUNDS, HITMASKS = flappy_bird_utils.load()
 IMAGES, HITMASKS = flappy_bird_utils.load()
 
-PLAYER_WIDTH     = IMAGES['player'][0].get_width()
-PLAYER_HEIGHT    = IMAGES['player'][0].get_height()
-PIPE_WIDTH       = IMAGES['pipe'][0].get_width()
-PIPE_HEIGHT      = IMAGES['pipe'][0].get_height()
+PLAYER_WIDTH = IMAGES['player'][0].get_width()
+PLAYER_HEIGHT = IMAGES['player'][0].get_height()
+PIPE_WIDTH = IMAGES['pipe'][0].get_width()
+PIPE_HEIGHT = IMAGES['pipe'][0].get_height()
 BACKGROUND_WIDTH = IMAGES['background'].get_width()
 
 PLAYER_INDEX_GEN = cycle([0, 1, 2, 1])
@@ -64,12 +59,12 @@ class GameState:
 
         # player velocity, max velocity, downward accleration, accleration on flap
         self.pipeVelX = -4
-        self.playerVelY    =  0    # player's velocity along Y, default same as playerFlapped
-        self.playerMaxVelY =  10   # max vel along Y, max descend speed
-        self.playerMinVelY =  -8   # min vel along Y, max ascend speed
-        self.playerAccY    =   1   # players downward accleration
-        self.playerFlapAcc =  -7   # players speed on flapping
-        self.playerFlapped = False # True when player flaps
+        self.playerVelY = 0  # player's velocity along Y, default same as playerFlapped
+        self.playerMaxVelY = 10  # max vel along Y, max descend speed
+        self.playerMinVelY = -8  # min vel along Y, max ascend speed
+        self.playerAccY = 1  # players downward accleration
+        self.playerFlapAcc = -7  # players speed on flapping
+        self.playerFlapped = False  # True when player flaps
 
     def frame_step(self, input_actions):
         pygame.event.pump()
@@ -86,7 +81,7 @@ class GameState:
             if self.playery > -2 * PLAYER_HEIGHT:
                 self.playerVelY = self.playerFlapAcc
                 self.playerFlapped = True
-                #SOUNDS['wing'].play()
+                # SOUNDS['wing'].play()
 
         # check for score
         playerMidPos = self.playerx + PLAYER_WIDTH / 2
@@ -94,7 +89,7 @@ class GameState:
             pipeMidPos = pipe['x'] + PIPE_WIDTH / 2
             if pipeMidPos <= playerMidPos < pipeMidPos + 4:
                 self.score += 1
-                #SOUNDS['point'].play()
+                # SOUNDS['point'].play()
                 reward = 1
 
         # playerIndex basex change
@@ -108,7 +103,7 @@ class GameState:
             self.playerVelY += self.playerAccY
         if self.playerFlapped:
             self.playerFlapped = False
-        
+
         self.playery += min(self.playerVelY, BASEY - self.playery - PLAYER_HEIGHT)
         if self.playery < 0:
             self.playery = 0
@@ -130,18 +125,18 @@ class GameState:
             self.lowerPipes.pop(0)
 
         # check if crash here
-        isCrash= checkCrash({'x': self.playerx, 'y': self.playery,
-                             'index': self.playerIndex},
-                            self.upperPipes, self.lowerPipes)
+        isCrash = checkCrash({'x': self.playerx, 'y': self.playery,
+                              'index': self.playerIndex},
+                             self.upperPipes, self.lowerPipes)
         if isCrash:
-            #SOUNDS['hit'].play()
-            #SOUNDS['die'].play()
+            # SOUNDS['hit'].play()
+            # SOUNDS['die'].play()
             terminal = True
             self.__init__()
             reward = -5
 
         # draw sprites
-        SCREEN.blit(IMAGES['background'], (0,0))
+        SCREEN.blit(IMAGES['background'], (0, 0))
 
         for uPipe, lPipe in zip(self.upperPipes, self.lowerPipes):
             SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
@@ -156,9 +151,9 @@ class GameState:
         image_data = pygame.surfarray.array3d(pygame.display.get_surface()).transpose((1, 0, 2))
         pygame.display.update()
         FPSCLOCK.tick(self.FPS)
-        #print self.upperPipes[0]['y'] + PIPE_HEIGHT - int(BASEY * 0.2)
+        # print self.upperPipes[0]['y'] + PIPE_HEIGHT - int(BASEY * 0.2)
         return image_data, reward, terminal
-    
+
     def reset(self):
         self.__init__()
 
@@ -167,7 +162,7 @@ def getRandomPipe():
     """returns a randomly generated pipe"""
     # y of gap between upper and lower pipe
     gapYs = [20, 30, 40, 50, 60, 70, 80, 90]
-    index = random.randint(0, len(gapYs)-1)
+    index = random.randint(0, len(gapYs) - 1)
     gapY = gapYs[index]
 
     gapY += int(BASEY * 0.2)
@@ -182,7 +177,7 @@ def getRandomPipe():
 def showScore(score):
     """displays score in center of screen"""
     scoreDigits = [int(x) for x in list(str(score))]
-    totalWidth = 0 # total width of all numbers to be printed
+    totalWidth = 0  # total width of all numbers to be printed
 
     for digit in scoreDigits:
         totalWidth += IMAGES['numbers'][digit].get_width()
@@ -206,7 +201,7 @@ def checkCrash(player, upperPipes, lowerPipes):
     else:
 
         playerRect = pygame.Rect(player['x'], player['y'],
-                      player['w'], player['h'])
+                                 player['w'], player['h'])
 
         for uPipe, lPipe in zip(upperPipes, lowerPipes):
             # upper and lower pipe rects
@@ -227,6 +222,7 @@ def checkCrash(player, upperPipes, lowerPipes):
 
     return False
 
+
 def pixelCollision(rect1, rect2, hitmask1, hitmask2):
     """Checks if two objects collide and not just their rects"""
     rect = rect1.clip(rect2)
@@ -239,6 +235,6 @@ def pixelCollision(rect1, rect2, hitmask1, hitmask2):
 
     for x in range(rect.width):
         for y in range(rect.height):
-            if hitmask1[x1+x][y1+y] and hitmask2[x2+x][y2+y]:
+            if hitmask1[x1 + x][y1 + y] and hitmask2[x2 + x][y2 + y]:
                 return True
     return False
