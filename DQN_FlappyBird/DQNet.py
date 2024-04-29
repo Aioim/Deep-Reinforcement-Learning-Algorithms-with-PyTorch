@@ -48,7 +48,7 @@ class DQN(nn.Module):
         # action_index = random.randrange(self.actions)
         action_index = 0 if random.random() < self.random_threshold else 1
         action[action_index] = 1
-        return action
+        return action_index
 
     def get_optim_action(self, obs):
         """Get optimal action based on current state
@@ -62,7 +62,7 @@ class DQN(nn.Module):
         action_index = action_index.cpu().numpy()[0]
         action = np.zeros(self.actions, dtype=np.float32)
         action[action_index] = 1
-        return action
+        return action_index
 
     def get_action(self, obs):
         """Get action w.r.t current state
@@ -109,7 +109,7 @@ class DQN(nn.Module):
             # ...
 
         q_value = torch.sum(torch.mul(action, q_value), dim=1)
-
+        print(q_value.size(), target.size())
         loss = criterion(q_value, target)
         # print(q_value, target, loss)
         loss.backward()

@@ -1,5 +1,6 @@
-from agents.actor_critic_agents.DDPG import DDPG
 from agents.HER_Base import HER_Base
+from agents.actor_critic_agents.DDPG import DDPG
+
 
 class DDPG_HER(HER_Base, DDPG):
     """DDPG algorithm with hindsight experience replay"""
@@ -31,8 +32,3 @@ class DDPG_HER(HER_Base, DDPG):
     def enough_experiences_to_learn_from(self):
         """Returns boolean indicating whether there are enough experiences to learn from and it is time to learn"""
         return len(self.memory) > self.ordinary_buffer_batch_size and len(self.HER_memory) > self.HER_buffer_batch_size
-
-
-
-
-

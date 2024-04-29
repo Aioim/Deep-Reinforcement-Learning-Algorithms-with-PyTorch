@@ -34,7 +34,7 @@ class Base_Agent(object):
 
         self.lowest_possible_episode_score = self.get_lowest_possible_episode_score()
 
-        self.state_size = int(self.get_state_size())
+        # self.state_size = int(self.get_state_size())
         self.hyperparameters = config.hyperparameters
         self.average_score_required_to_win = self.get_score_required_to_win()
         self.rolling_score_window = self.get_trials()
@@ -100,17 +100,17 @@ class Base_Agent(object):
         else:
             return self.environment.action_space.shape[0]
 
-    def get_state_size(self):
-        """Gets the state_size for the gym env into the correct shape for a neural network"""
-        random_state = self.environment.reset()
-        if isinstance(random_state, dict):
-            state_size = (
-                random_state["observation"].shape[0]
-                + random_state["desired_goal"].shape[0]
-            )
-            return state_size
-        else:
-            return random_state.size
+    # def get_state_size(self):
+    #     """Gets the state_size for the gym env into the correct shape for a neural network"""
+    #     random_state = self.environment.reset()
+    #     if isinstance(random_state, dict):
+    #         state_size = (
+    #             random_state["observation"].shape[0]
+    #             + random_state["desired_goal"].shape[0]
+    #         )
+    #         return state_size
+    #     else:
+    #         return random_state.size
 
     def get_score_required_to_win(self):
         """Gets average score required to win game"""
@@ -171,17 +171,17 @@ class Base_Agent(object):
     def log_game_info(self):
         """Logs info relating to the game"""
         for ix, param in enumerate(
-            [
-                self.environment_title,
-                self.action_types,
-                self.action_size,
-                self.lowest_possible_episode_score,
-                self.state_size,
-                self.hyperparameters,
-                self.average_score_required_to_win,
-                self.rolling_score_window,
-                self.device,
-            ]
+                [
+                    self.environment_title,
+                    self.action_types,
+                    self.action_size,
+                    self.lowest_possible_episode_score,
+                    # self.state_size,
+                    self.hyperparameters,
+                    self.average_score_required_to_win,
+                    self.rolling_score_window,
+                    self.device,
+                ]
         ):
             self.logger.info("{} -- {}".format(ix, param))
 
@@ -230,10 +230,10 @@ class Base_Agent(object):
         self.episode_dones.append(self.done)
 
     def run_n_episodes(
-        self,
-        num_episodes=None,
-        show_whether_achieved_goal=True,
-        save_and_print_results=True,
+            self,
+            num_episodes=None,
+            show_whether_achieved_goal=True,
+            save_and_print_results=True,
     ):
         """Runs game to completion n times and then summarises results and saves model (if asked to)"""
         if num_episodes is None:
@@ -269,7 +269,7 @@ class Base_Agent(object):
         """Saves the result of an episode of the game"""
         self.game_full_episode_scores.append(self.total_episode_score_so_far)
         self.rolling_results.append(
-            np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window :])
+            np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window:])
         )
         self.save_max_result_seen()
 
@@ -353,7 +353,7 @@ class Base_Agent(object):
     def save_experience(self, memory=None, experience=None):
         # 保存经验
         """Saves the recent experience to the memory buffer"""
-        if memory is None:#可能使用其他类型的经验池
+        if memory is None:  # 可能使用其他类型的经验池
             memory = self.memory
         if experience is None:
             experience = (
@@ -366,7 +366,7 @@ class Base_Agent(object):
         memory.add_experience(*experience)
 
     def take_optimisation_step(
-        self, optimizer, network, loss, clipping_norm=None, retain_graph=False
+            self, optimizer, network, loss, clipping_norm=None, retain_graph=False
     ):
         """Takes an optimisation step by calculating gradients given the loss and then updating the parameters"""
         if not isinstance(network, list):
@@ -403,19 +403,19 @@ class Base_Agent(object):
         less than one so the target network's parameter values trail the local networks. This helps stabilise training
         """
         for target_param, local_param in zip(
-            target_model.parameters(), local_model.parameters()
+                target_model.parameters(), local_model.parameters()
         ):
             target_param.data.copy_(
                 tau * local_param.data + (1.0 - tau) * target_param.data
             )
 
     def create_NN(
-        self,
-        input_dim,
-        output_dim,
-        key_to_use=None,
-        override_seed=None,
-        hyperparameters=None,
+            self,
+            input_dim,
+            output_dim,
+            key_to_use=None,
+            override_seed=None,
+            hyperparameters=None,
     ):
         """Creates a neural network for the agents to use"""
         if hyperparameters is None:
@@ -477,9 +477,9 @@ class Base_Agent(object):
         for param in network.named_parameters():
             param_name = param[0]
             assert (
-                "hidden" in param_name
-                or "output" in param_name
-                or "embedding" in param_name
+                    "hidden" in param_name
+                    or "output" in param_name
+                    or "embedding" in param_name
             ), "Name {} of network layers not understood".format(param_name)
             if "output" not in param_name:
                 param[1].requires_grad = False
@@ -493,7 +493,7 @@ class Base_Agent(object):
 
     @staticmethod
     def move_gradients_one_model_to_another(
-        from_model, to_model, set_from_gradients_to_zero=False
+            from_model, to_model, set_from_gradients_to_zero=False
     ):
         """Copies gradients from from_model to to_model"""
         for from_model, to_model in zip(from_model.parameters(), to_model.parameters()):

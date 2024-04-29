@@ -1,18 +1,15 @@
-import game.wrapped_flappy_bird as game
 # from BrainDQN import *
-import shutil
 import time
-import numpy as np
-import random
-import torch
-import torch.nn as nn
-import torch.optim as optim
-# import PIL.Image as Image
-from PIL import Image
 
-from model import QNetwork
+import torch.optim as optim
+
+import game.wrapped_flappy_bird as game
 from DQNet import DQN
+from model import QNetwork
 from utils import *
+
+
+# import PIL.Image as Image
 
 
 def train_dqn(options):

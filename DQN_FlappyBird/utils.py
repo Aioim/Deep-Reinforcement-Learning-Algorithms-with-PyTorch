@@ -1,17 +1,13 @@
-import sys
 # sys.path.append("game/")
-import game.wrapped_flappy_bird as game
 # from BrainDQN import *
 import collections
-import shutil
-import numpy as np
 import logging
 import random
-import torch
-import torch.nn as nn
-import torch.optim as optim
+import shutil
 
 import PIL.Image as Image
+import numpy as np
+import torch
 
 IMAGE_SIZE = (72, 128)
 
@@ -75,7 +71,7 @@ class ReplayMemory(object):
 
     def append(self, o_next, action, reward, terminal):
         next_state = np.append(self.current_state[1:, :, :], o_next.reshape((1,) + o_next.shape), axis=0)
-        self.buffer.append((self.current_state, action, reward, next_state, terminal))
+        self.buffer.append((action, reward, next_state, terminal))
 
         if not terminal:
             self.current_state = next_state
@@ -91,7 +87,6 @@ class ReplayMemory(object):
 
 def preprocess(frame):
     """Do preprocessing: resize and binarize.
-
        Downsampling to 128x72 size and convert to grayscale
        frame -- input frame, rgb image with 512x288 size
     """

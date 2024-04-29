@@ -11,6 +11,7 @@ from agents.DQN_agents.DDQN_With_Prioritised_Experience_Replay import DDQN_With_
 from agents.DQN_agents.DQN_With_Fixed_Q_Targets import DQN_With_Fixed_Q_Targets
 from agents.actor_critic_agents.DDPG import DDPG
 from agents.actor_critic_agents.DDPG_HER import DDPG_HER
+from DQN_FlappyBird.game import flappy_bird_utils
 from environments.Bit_Flipping_Environment import Bit_Flipping_Environment
 from agents.policy_gradient_agents.PPO import PPO
 from environments.Four_Rooms_Environment import Four_Rooms_Environment
@@ -21,6 +22,7 @@ from utilities.data_structures.Config import Config
 from agents.DQN_agents.DQN import DQN
 import numpy as np
 import torch
+from DQN_FlappyBird.game import wrapped_flappy_bird as game
 
 random.seed(1)
 np.random.seed(1)
@@ -28,7 +30,7 @@ torch.manual_seed(1)
 
 config = Config()
 config.seed = 1
-config.environment = Bit_Flipping_Environment(4)
+config.environment = game.GameState()
 config.num_episodes_to_run = 2000
 config.file_to_save_data_results = None
 config.file_to_save_results_graph = None

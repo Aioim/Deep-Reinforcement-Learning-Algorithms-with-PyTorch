@@ -27,6 +27,7 @@ parser.add_argument('--update_target_steps', type=int, help='update frequency fo
 parser.add_argument('--ckpt_path', type=str, help='weight file name for finetunig(Optional)',
                     default='ckpt/episode.ckpt')
 parser.add_argument('--save_checkpoint_freq', type=int, help='episode interval to save checkpoint', default=2000)
+parser.add_argument('--save_checkpoint_freq', type=int, help='episode interval to save checkpoint', default=2000)
 
 if __name__ == '__main__':
 
